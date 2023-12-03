@@ -8,7 +8,7 @@ This is a repo containing my solutions to [Eric Wastl's](http://was.tl/) **Adven
 
 ## 2023 Puzzles List
 
-Completed: **0 / 25** (0%)
+Completed: **1 / 25** (4%)
 *  [✅ Day 01](2023/Day%2001/)
 *  [Day 02](2023/Day%2002/)
 *  [Day 03](2023/Day%2003/)
