@@ -19,7 +19,7 @@ fs.readFile(filePath, 'utf8', (err, data) => {
         return
     }
 
-    input = data.split("\n");
+    const input = data.split("\n");
 
     input.forEach((line) => {
       parseAndCheck(line);
