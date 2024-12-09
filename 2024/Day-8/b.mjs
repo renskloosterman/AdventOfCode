@@ -1,6 +1,8 @@
+import { group } from 'console';
 import * as fs from 'fs'
 import * as path from 'path'
 import { fileURLToPath } from 'url';
+import { logMatrix } from '../helpers/logMatrix.js'
 
 const __filename = fileURLToPath(import.meta.url); // Get the current file's URL and convert it to a path
 const __dirname = path.dirname(__filename);
@@ -11,23 +13,83 @@ const txtFile = TESTING ? 'TestInput.txt' : 'Input.txt'
 const filePath = path.join(__dirname, txtFile);
 
 console.log('start')
-let answer = null
-
+let answer = 0
+const antiNodesCoordinates = []
+const matrix = []
 fs.readFile(filePath, 'utf8', (err, data) => {
-    if (err) {
-        console.error("Error reading file:", err);
-        return
+  if (err) {
+    console.error("Error reading file:", err);
+    return
+  }
+
+  const input = data.split("\n");
+
+  const groupedCoordinates = {};
+
+  // Process the input
+  input.forEach((line, y) => {
+    // Remove the '\r' character from the line
+    line = line.replace('\r', '');
+    const lineArray = []
+    for (let x = 0; x < line.length; x++) {
+      const character = line[x];
+      lineArray.push(character)
+      if (character !== '.') { // Ignore '.'
+        if (!groupedCoordinates[character]) {
+          groupedCoordinates[character] = [];
+        }
+        // Add the coordinates to the character's group
+        groupedCoordinates[character].push({ x, y });
+      }
     }
+    matrix.push(lineArray)
+  });
+  logMatrix(matrix)
 
-    input = data.split("\n");
+  console.log(groupedCoordinates)
+  for(const character in groupedCoordinates) {
+    groupedCoordinates[character].forEach(coord => {
+      // console.log(`${character}: checking coord ${coord.x}, ${coord.y} with `);
+      
+      for(let i = 0; i < groupedCoordinates[character].length; i++) {
+        if(groupedCoordinates[character][i] == coord) {
+          continue;
+        }
+        const antiNodeCoordinatesInLine = calculateAntiNodeCoordinatesInLine(coord, groupedCoordinates[character][i])
+        antiNodeCoordinatesInLine.forEach(antiNodeCoordinate => {
+        if(
+          antiNodeCoordinate.x >= 0 &&
+          antiNodeCoordinate.y >= 0 &&
+          antiNodeCoordinate.x < matrix[0].length &&
+          antiNodeCoordinate.y < matrix.length
+        ) {
+          antiNodesCoordinates.push(antiNodeCoordinate)
+        }
+    })
+        // console.log(`${JSON.stringify(groupedCoordinates[character][i])}`)
 
-    input.forEach((line) => {
-      parseAndCheck(line);
-    });
-
-    console.log(answer)
+      }
+      // console.log('')
+    })
+  }
+  console.log(antiNodesCoordinates)
+  const uniqueCoordinates = new Set(
+    antiNodesCoordinates.map(coord => `${coord.x},${coord.y}`)
+  );
+  console.log(uniqueCoordinates.size)
 })
 
-function parseAndCheck(line) {
-
+function calculateAntiNodeCoordinatesInLine(coordinate1, coordinate2) {
+  const antiNodeCoordinatesInLine = []
+  const deltaX = coordinate2.x - coordinate1.x 
+  const deltaY = coordinate2.y - coordinate1.y 
+  const antiNodeCoordinate = { x: (coordinate2.x + deltaX), y: (coordinate2.y + deltaY)} 
+  antiNodeCoordinatesInLine.push(coordinate1)
+  antiNodeCoordinatesInLine.push(coordinate2)
+  for(let i = 0; i < 500; i++) {
+    const nextAntiNodeCoordinate = { x: (antiNodeCoordinatesInLine[antiNodeCoordinatesInLine.length-1].x + deltaX), y: (antiNodeCoordinatesInLine[antiNodeCoordinatesInLine.length-1].y + deltaY)} 
+    antiNodeCoordinatesInLine.push(nextAntiNodeCoordinate)
+  }
+  // console.log(possibleAntiNodeCoordinate)
+  return antiNodeCoordinatesInLine
 }
