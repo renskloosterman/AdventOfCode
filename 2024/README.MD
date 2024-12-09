@@ -6,6 +6,8 @@
 
 This is a repo containing my solutions to [Eric Wastl's](http://was.tl/) **Advent of Code**.
 
+Start a script by going to the day-X folder and running "npx nodemon .\a.mjs --quiet"
+
 ## 2024 Puzzles List
 
 Completed: **5 / 25** (20%)
@@ -37,3 +39,4 @@ Completed: **5 / 25** (20%)
 - [Day 25](2023/Day-25/)
 
 ☆★
+
