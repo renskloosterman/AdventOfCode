@@ -1,8 +1,15 @@
 import * as fs from "fs";
-import { config } from "process";
-console.log("");
-console.log("");
-console.log("");
+import * as path from 'path'
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url); // Get the current file's URL and convert it to a path
+const __dirname = path.dirname(__filename);
+
+console.clear()
+const TESTING = false
+const txtFile = TESTING ? 'TestInput.txt' : 'Input.txt'
+const filePath = path.join(__dirname, txtFile);
+
 let answer = BigInt(0);
 let input = null;
 const operators = ["+", "*"];
@@ -37,7 +44,7 @@ function calculateLeftToRight(expression) {
 }
 
 fs.readFile(
-  "C:/Users/rkloost3/OneDrive - Enexis productie/desktop/AOC 2024/Day-7/Input.txt",
+  filePath,
   "UTF8",
   (err, data) => {
     if (err) throw err;

@@ -1,85 +1,131 @@
 import * as fs from "fs";
+import * as path from 'path'
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url); // Get the current file's URL and convert it to a path
+const __dirname = path.dirname(__filename);
+
+console.clear()
+const TESTING = false
+const txtFile = TESTING ? 'TestInput.txt' : 'Input.txt'
+const filePath = path.join(__dirname, txtFile);
+
+let answer = BigInt(0);
+let input = null;
+const operators = ["+", "*", "||"];
+
+function calculateLeftToRight(expression) {
+  const numbers = expression.split(" ");
+  let result = parseFloat(numbers[0]);
+
+  for (let i = 1; i < numbers.length; i += 2) {
+    const operator = numbers[i];
+    const nextNumber = parseFloat(numbers[i + 1]);
+
+    switch (operator) {
+      case "+":
+        result += nextNumber;
+        break;
+      case "-":
+        result -= nextNumber;
+        break;
+      case "*":
+        result *= nextNumber;
+        break;
+      case "/":
+        result /= nextNumber;
+        break;
+      case "||":
+        const numberOne = result.toString()
+        const numberTwo = nextNumber.toString()
+        const added = numberOne+numberTwo
+        // result = BigInt((result.toString()+nextNumber.toString()))
+        result = parseInt(added)
+        break
+      default:
+        throw new Error(`Unsupported operator ${operator}`);
+    }
+  }
+
+  return result;
+}
 
 fs.readFile(
-  "C:/Users/rkloost3/OneDrive - Enexis productie/desktop/AOC 2024/Day-5/Input.txt",
+  filePath,
   "UTF8",
   (err, data) => {
     if (err) throw err;
 
-    const dependencies = {};
-    const updates = [];
-    const validUpdates = [];
-    const invalidUpdates = [];
-    const fixedUpdates = [];
+    input = data.split("\n");
 
-    data.split("\n").forEach((line) => {
-      if (line.includes("|")) {
-        const [dependentOn, number] = line.split("|");
-        if (!dependencies[number]) {
-          dependencies[number] = [];
-        }
-        dependencies[number].push(dependentOn);
-      } else if (line.includes(",")) {
-        updates.push(line.split(",").map(Number));
-      }
+    input.forEach((line) => {
+      parseAndCheck(line);
     });
 
-    updates.forEach((update) => {
-      const updatesDone = [];
-      let isValid = update.every((updateNumber) => {
-        const dependencyNumbers = dependencies[updateNumber]?.map(Number) || [];
-        const includedDependencies = dependencyNumbers.filter((dependency) =>
-          update.includes(dependency)
-        );
-
-        if (
-          !includedDependencies.length ||
-          includedDependencies.every((num) => updatesDone.includes(num))
-        ) {
-          updatesDone.push(updateNumber);
-          return true;
-        }
-        invalidUpdates.push(update);
-        return false;
-      });
-
-      if (isValid) validUpdates.push(update);
-    });
-
-    // FIX INVALID UPDATES
-    invalidUpdates.forEach((invalidUpdate) => {
-      let listLength = invalidUpdate.length;
-      let fixedUpdate = [];
-
-      while (fixedUpdate.length != listLength) {
-        // Check for a number that only has update dependencies that are not in the updateList
-        const validNumber = invalidUpdate.find((updateNumber) => {
-          const dependencyNumbers =
-            dependencies[updateNumber]?.map(Number) || [];
-          const includedDependencies = dependencyNumbers.filter((dependency) =>
-            invalidUpdate.includes(dependency)
-          );
-          return (
-            includedDependencies.length === 0 ||
-            includedDependencies.every((dependency) =>
-              fixedUpdate.includes(dependency)
-            )
-          );
-        });
-        // console.log(validNumber);
-        fixedUpdate.push(validNumber);
-        let index = invalidUpdate.indexOf(validNumber);
-        if (index !== -1) {
-          invalidUpdate.splice(index, 1);
-        }
-      }
-      fixedUpdates.push(fixedUpdate);
-    });
-
-    const totalValue = fixedUpdates.reduce(
-      (acc, update) => acc + update[Math.floor(update.length / 2)],
-      0
-    );
-    console.log(totalValue);
+    console.log(answer);
   }
 );
+
+function parseAndCheck(input) {
+  const parts = input.match(/\d+/g).map(Number)
+
+  const targetNumber = parts[0];
+  const numbers = parts.slice(1);
+
+  const configurationsToCheck = getPossibleConfigurations(
+    operators.length,
+    numbers.length - 1
+  );
+  // console.log(configurationsToCheck);
+  for (let i = 0; i < configurationsToCheck.length; i++) {
+    const configuration = configurationsToCheck[i];
+    const equationString = getEquation(configuration, numbers);
+    const calculatedNumber = calculateLeftToRight(equationString);
+    if (targetNumber == calculatedNumber) {
+      answer += BigInt(targetNumber);
+      console.log(`${targetNumber} can be done with ${equationString}`);
+      break; // Exit the loop
+    }
+  }
+
+  // This function converts a decimal number to binary
+  function decimalToTertiary(decimal) {
+    return decimal.toString(3);
+  }
+
+  // This function prints the binary representation of numbers from 0 to given limit
+  function getPossibleConfigurations(numberOfOperators, amountOfOperatorSpots) {
+    const numberOfPossibleConfigurations = Math.pow(
+      numberOfOperators,
+      amountOfOperatorSpots
+    );
+    const configurationsToCheck = [];
+    for (let i = 0; i < numberOfPossibleConfigurations; i++) {
+      const binaryCode = decimalToTertiary(i);
+      configurationsToCheck.push(padNumber(binaryCode, amountOfOperatorSpots));
+    }
+    return configurationsToCheck;
+  }
+
+  function padNumber(number, size) {
+    let s = number.toString();
+    while (s.length < size) {
+      s = "0" + s;
+    }
+    return s;
+  }
+
+  function getEquation(configuration, numbers) {
+    const configurations = configuration.split("");
+    let equationString = "";
+    for (let i = 0; i < numbers.length; i++) {
+      equationString += numbers[i];
+      if (i < configurations.length) {
+        const operator = operators[configurations[i]];
+        equationString += ` ${operator} `;
+      }
+    }
+
+    return equationString;
+  }
+}
