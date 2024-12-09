@@ -10,7 +10,7 @@ const TESTING = false
 const txtFile = TESTING ? 'TestInput.txt' : 'Input.txt'
 const filePath = path.join(__dirname, txtFile);
 
-let answer = BigInt(0);
+let answer = 0;
 let input = null;
 const operators = ["+", "*"];
 
@@ -78,7 +78,7 @@ function parseAndCheck(input) {
     const equationString = getEquation(configuration, numbers);
     const calculatedNumber = calculateLeftToRight(equationString);
     if (targetNumber == calculatedNumber) {
-      answer += BigInt(targetNumber);
+      answer += targetNumber;
       break; // Exit the loop
     }
   }
