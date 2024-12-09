@@ -6,7 +6,7 @@ const __filename = fileURLToPath(import.meta.url); // Get the current file's URL
 const __dirname = path.dirname(__filename);
 
 console.clear()
-const TESTING = false
+const TESTING = true
 const txtFile = TESTING ? 'TestInput.txt' : 'Input.txt'
 const filePath = path.join(__dirname, txtFile);
 
